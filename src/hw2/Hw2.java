@@ -3,6 +3,8 @@
  * and open the template in the editor.
  */
 package hw2;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
@@ -23,7 +25,7 @@ public class Hw2 extends javax.swing.JFrame {
     ArrayList<Integer> pY = new ArrayList<Integer>();
     
     // For Range Query, is this the first point?
-    boolean isFirstPoint = false; 
+    boolean isFirstPoint = true; 
     /**
      * Creates new form Hw2
      */
@@ -168,10 +170,10 @@ public class Hw2 extends javax.swing.JFrame {
             return WHOLE_REGION;
         }
         if (jRadioButton2.isSelected()) {
-            return POINT_QUERY;
+            return RANGE_QUERY;
         }
         if (jRadioButton3.isSelected()) {
-            return RANGE_QUERY;
+            return POINT_QUERY;
         }
         if (jRadioButton4.isSelected()) {
             return AP_COVERED;
@@ -204,17 +206,40 @@ public class Hw2 extends javax.swing.JFrame {
         // TODO add your handling code here:
         // Does different things depending on which radio button is checked.
         // So first determine which query we have.
+        // get graphics to set colors etc
+        Graphics g = jLabel1.getGraphics();
         int queryType = getQueryType();
+        System.out.println(queryType);
         switch(queryType) {
             case WHOLE_REGION:  break;
             case RANGE_QUERY:   // left click to draw first n-1 sides of polygon
+                                System.out.println("click!!");
+                        
                                 if(evt.getButton() == MouseEvent.BUTTON1) {
                                     // check if it was first point.
                                     if(isFirstPoint) {
-                                        // simply add it to pX and pY
-                                        
+                                        // reset
+                                        pX.clear();
+                                        pY.clear();
                                     }
-                                    
+                                    // add new point
+                                    pX.add(evt.getX());
+                                    pY.add(evt.getY());
+                                    if(!isFirstPoint) {
+                                        g.setColor(Color.red);
+                                        // line from last to 2nd last point
+                                        g.drawLine(pX.get(pX.size()-1), pY.get(pY.size()-1), pX.get(pX.size()-2), pY.get(pY.size()-2));
+                                    }
+                                    isFirstPoint = false;
+                                }
+                                // right click to end the polygon
+                                else if(evt.getButton() == MouseEvent.BUTTON3) {
+                                    // we need at least 3 points
+                                    if(pX.size() >= 3) {
+                                        g.setColor(Color.red);
+                                        // line from last to first point
+                                        g.drawLine(pX.get(pX.size()-1), pY.get(pY.size()-1), pX.get(0), pY.get(0));
+                                    }
                                 } 
                                 break;
             case POINT_QUERY: 
