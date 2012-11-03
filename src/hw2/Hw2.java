@@ -3,13 +3,27 @@
  * and open the template in the editor.
  */
 package hw2;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 /**
  *
  * @author Hardik
  */
 public class Hw2 extends javax.swing.JFrame {
-
+    
+    /* Query Types */
+    public static final int WHOLE_REGION = 1;
+    public static final int RANGE_QUERY = 2;
+    public static final int POINT_QUERY = 3;
+    public static final int AP_COVERED = 4;
+    
+    // Polygon X and Y co-ordinate lists
+    ArrayList<Integer> pX = new ArrayList<Integer>();
+    ArrayList<Integer> pY = new ArrayList<Integer>();
+    
+    // For Range Query, is this the first point?
+    boolean isFirstPoint = false; 
     /**
      * Creates new form Hw2
      */
@@ -44,6 +58,11 @@ public class Hw2 extends javax.swing.JFrame {
 
         jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\Hardik\\Documents\\NetBeansProjects\\hw2\\data\\map.jpg")); // NOI18N
         jLabel1.setText("jLabel1");
+        jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel1MouseClicked(evt);
+            }
+        });
 
         jCheckBox1.setText("Buildings");
 
@@ -66,6 +85,11 @@ public class Hw2 extends javax.swing.JFrame {
         jLabel3.setText("Active Feature Type");
 
         jButton1.setText("Submit Query");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
@@ -138,6 +162,67 @@ public class Hw2 extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    
+    public int getQueryType() {
+        if (jRadioButton1.isSelected()) {
+            return WHOLE_REGION;
+        }
+        if (jRadioButton2.isSelected()) {
+            return POINT_QUERY;
+        }
+        if (jRadioButton3.isSelected()) {
+            return RANGE_QUERY;
+        }
+        if (jRadioButton4.isSelected()) {
+            return AP_COVERED;
+        }
+        return 0;
+    }
+    
+    public ArrayList<String> getChecked() {
+        ArrayList<String> checked = new ArrayList();
+        if (jCheckBox1.isSelected()) {
+            checked.add(jCheckBox1.getText());
+        }
+        if (jCheckBox2.isSelected()) {
+            checked.add(jCheckBox2.getText());
+        }
+        if (jCheckBox3.isSelected()) {
+            checked.add(jCheckBox3.getText());
+        }
+        return checked;
+    }
+    
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        int queryType = getQueryType();
+        ArrayList<String> checked = getChecked();
+        
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
+        // TODO add your handling code here:
+        // Does different things depending on which radio button is checked.
+        // So first determine which query we have.
+        int queryType = getQueryType();
+        switch(queryType) {
+            case WHOLE_REGION:  break;
+            case RANGE_QUERY:   // left click to draw first n-1 sides of polygon
+                                if(evt.getButton() == MouseEvent.BUTTON1) {
+                                    // check if it was first point.
+                                    if(isFirstPoint) {
+                                        // simply add it to pX and pY
+                                        
+                                    }
+                                    
+                                } 
+                                break;
+            case POINT_QUERY: 
+                                break;
+            case AP_COVERED: 
+                                break;
+        }
+    }//GEN-LAST:event_jLabel1MouseClicked
 
     /**
      * @param args the command line arguments
