@@ -6,6 +6,7 @@ package hw2;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 
 /**
@@ -13,7 +14,7 @@ import java.util.ArrayList;
  * @author Hardik
  */
 public class Hw2 extends javax.swing.JFrame {
-    
+    /* ------------------ GLOBAL VARIABLES START ----------------*/
     /* Query Types */
     public static final int WHOLE_REGION = 1;
     public static final int RANGE_QUERY = 2;
@@ -26,6 +27,15 @@ public class Hw2 extends javax.swing.JFrame {
     
     // For Range Query, is this the first point?
     boolean isFirstPoint = true; 
+    
+    // query counter - as per requirement
+    int numQueries = 0;
+    
+    // for query 4
+    int xc,yc,radius; // x,y co-ordinates and radius
+    
+    /* ------------------ GLOBAL VARIABLES END ----------------*/
+    
     /**
      * Creates new form Hw2
      */
@@ -75,10 +85,25 @@ public class Hw2 extends javax.swing.JFrame {
         jRadioButton1.setText("Whole Region");
 
         jRadioButton2.setText("Range Query");
+        jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton2ActionPerformed(evt);
+            }
+        });
 
         jRadioButton3.setText("Point Query");
+        jRadioButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton3ActionPerformed(evt);
+            }
+        });
 
         jRadioButton4.setText("Find AP Covered People");
+        jRadioButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton4ActionPerformed(evt);
+            }
+        });
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel2.setText("Query");
@@ -195,6 +220,46 @@ public class Hw2 extends javax.swing.JFrame {
         return checked;
     }
     
+    public void getNearestAP(int x, int y, Graphics g) {
+        DBUtils db = new DBUtils();
+        db.connect();
+        String query = "select a.ap_position.SDO_POINT.X ,a.ap_position.SDO_POINT.Y,a.radius from ap a where SDO_NN(a.ap_position,SDO_GEOMETRY(2001,NULL,SDO_POINT_TYPE("+ x + "," + y + ",NULL),NULL,NULL),'SDO_NUM_RES = 1') = 'TRUE'"; 
+        // update query text box
+        numQueries++;
+        jTextArea1.append("\nQuery "+numQueries+": "+query);
+        // make actual query
+        ResultSet rs = db.getResultSet(query);
+        try {
+            // JDBC code
+            while(rs.next()) {
+                xc = rs.getInt("ap_position.SDO_POINT.X");
+                yc = rs.getInt("ap_position.SDO_POINT.Y");
+                radius = rs.getInt("radius");
+                // set nearest AP to blue
+                g.setColor(Color.blue);
+                g.fillRect(xc-15/2, yc-15/2, 15, 15);
+                g.dispose();   
+            }
+            rs.close();
+        }
+        catch(Exception e) {
+            System.out.println("ERROR: "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
+            System.exit(Errors.RESULT_SET_ERROR);
+        }
+    }
+    
+    public void showAllBuildings() {
+        
+    }
+    
+    public void showAllPersons() {
+        
+    }
+    
+    public void showAllAPs() {
+        
+    }
+    
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         int queryType = getQueryType();
@@ -209,12 +274,10 @@ public class Hw2 extends javax.swing.JFrame {
         // get graphics to set colors etc
         Graphics g = jLabel1.getGraphics();
         int queryType = getQueryType();
-        System.out.println(queryType);
+        System.out.println("QueryType: "+queryType);
         switch(queryType) {
             case WHOLE_REGION:  break;
-            case RANGE_QUERY:   // left click to draw first n-1 sides of polygon
-                                System.out.println("click!!");
-                        
+            case RANGE_QUERY:   // left click to draw first n-1 sides of polygon                        
                                 if(evt.getButton() == MouseEvent.BUTTON1) {
                                     // check if it was first point.
                                     if(isFirstPoint) {
@@ -242,12 +305,40 @@ public class Hw2 extends javax.swing.JFrame {
                                     }
                                 } 
                                 break;
-            case POINT_QUERY: 
+            case POINT_QUERY:   // respond only on left click
+                                if(evt.getButton() == MouseEvent.BUTTON1) {
+                                    g.setColor(Color.red);
+                                    g.fillRect(evt.getX()-(5/2),evt.getY()-(5/2),5,5);
+                                    g.drawOval(evt.getX()-70,evt.getY()-70,140,140);
+                                }
                                 break;
-            case AP_COVERED: 
+            case AP_COVERED:    // respond only on left click
+                                if(evt.getButton() == MouseEvent.BUTTON1) {
+                                    getNearestAP(evt.getX(), evt.getY(),g);
+                                }
                                 break;
         }
     }//GEN-LAST:event_jLabel1MouseClicked
+
+    private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton2ActionPerformed
+        // TODO add your handling code here:
+        jLabel1.repaint();
+        pX.clear();
+        pY.clear();
+        isFirstPoint = true;
+    }//GEN-LAST:event_jRadioButton2ActionPerformed
+
+    private void jRadioButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton3ActionPerformed
+        // TODO add your handling code here:
+        jLabel1.repaint();
+    }//GEN-LAST:event_jRadioButton3ActionPerformed
+
+    private void jRadioButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton4ActionPerformed
+        // TODO add your handling code here:
+        showAllBuildings();
+        showAllPersons();
+        showAllAPs();
+    }//GEN-LAST:event_jRadioButton4ActionPerformed
 
     /**
      * @param args the command line arguments

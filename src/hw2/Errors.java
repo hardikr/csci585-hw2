@@ -15,5 +15,5 @@ public class Errors {
     public static final int DB_DELETE_ERROR = -103;
     public static final int DB_CLOSE_ERROR = -104;
     public static final int DB_QUERY_EXECUTE_ERROR = -105;
-    
+    public static final int RESULT_SET_ERROR = -106;
 }
