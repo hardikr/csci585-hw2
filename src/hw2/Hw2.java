@@ -36,6 +36,9 @@ public class Hw2 extends javax.swing.JFrame {
     // for query 4
     int xc,yc,radius; // x,y co-ordinates and radius
     
+    // for query 3
+    int mouseX,mouseY;
+    
     /* ------------------ GLOBAL VARIABLES END ----------------*/
     
     /**
@@ -54,6 +57,7 @@ public class Hw2 extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         jCheckBox1 = new javax.swing.JCheckBox();
         jCheckBox2 = new javax.swing.JCheckBox();
@@ -67,6 +71,7 @@ public class Hw2 extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -84,8 +89,10 @@ public class Hw2 extends javax.swing.JFrame {
 
         jCheckBox3.setText("Access Points");
 
+        buttonGroup1.add(jRadioButton1);
         jRadioButton1.setText("Whole Region");
 
+        buttonGroup1.add(jRadioButton2);
         jRadioButton2.setText("Range Query");
         jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -93,6 +100,7 @@ public class Hw2 extends javax.swing.JFrame {
             }
         });
 
+        buttonGroup1.add(jRadioButton3);
         jRadioButton3.setText("Point Query");
         jRadioButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -100,6 +108,7 @@ public class Hw2 extends javax.swing.JFrame {
             }
         });
 
+        buttonGroup1.add(jRadioButton4);
         jRadioButton4.setText("Find AP Covered People");
         jRadioButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -124,6 +133,13 @@ public class Hw2 extends javax.swing.JFrame {
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
 
+        jButton2.setText("Reset");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -133,10 +149,6 @@ public class Hw2 extends javax.swing.JFrame {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 782, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 820, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(69, 69, 69)
-                        .addComponent(jLabel2)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
@@ -156,7 +168,16 @@ public class Hw2 extends javax.swing.JFrame {
                                         .addComponent(jCheckBox3, javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(jCheckBox2, javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(jCheckBox1, javax.swing.GroupLayout.Alignment.LEADING)))))
-                        .addGap(0, 166, Short.MAX_VALUE))))
+                        .addGap(0, 166, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(69, 69, 69)
+                                .addComponent(jLabel2))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(65, 65, 65)
+                                .addComponent(jButton2)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -184,8 +205,13 @@ public class Hw2 extends javax.swing.JFrame {
                         .addComponent(jRadioButton4)
                         .addGap(33, 33, 33)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(32, 32, 32)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(32, 32, 32)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2)))
                 .addGap(0, 35, Short.MAX_VALUE))
         );
 
@@ -227,6 +253,306 @@ public class Hw2 extends javax.swing.JFrame {
         jTextArea1.append("\nQuery "+numQueries+": "+query);
     }
     
+    
+    
+    /* ------------ BUILDING FUNCTIONS START --------------- */
+    
+    public void drawBuildings(int[] x,int[] y, int numVertices, Color c) {
+        Graphics g = jLabel1.getGraphics();
+        g.setColor(c);
+        g.drawPolygon(x,y,numVertices);
+        g.dispose();
+    }
+    public void parseBldgResultSet(ResultSet rs,Color c) {
+        try{
+            while (rs.next()){
+                int i = 0;
+                boolean isX = true;
+                Array rsArr = ((OracleResultSet)rs).getArray("shape.SDO_ORDINATES");
+                int numVertices = rs.getInt("numvertices");
+                Number[] pos = (Number[])rsArr.getArray();
+                int[] x = new int[pos.length];
+                int[] y = new int[pos.length];
+                for(Number p : pos){
+                    if (isX){
+                        x[i] = p.intValue();
+                        isX = false;
+                    }
+                    else {
+                        y[i] = p.intValue();
+                        isX = true;
+                        i++; // next point
+                    }
+                }
+                drawBuildings(x,y,numVertices,c);             
+            }
+            rs.close();
+        }
+        catch(Exception e){
+            System.out.println("ERROR: in parseBldg "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
+            System.exit(Errors.RESULT_SET_ERROR);
+        }
+
+    }
+    public void showBuildings() {
+        DBUtils db = new DBUtils();
+        db.connect();
+        String query = "select b.numvertices,b.shape.SDO_ORDINATES from building b";
+        updateQueryBox(query);         // update UI first to appear faster
+        ResultSet rs = db.getResultSet(query);   // then actually execute query
+        parseBldgResultSet(rs,Color.yellow);
+        db.close();
+    }
+    
+    /* //////////////  BUILDING FUNCTIONS END \\\\\\\\\\\\\\\\\\\\ */
+    
+    /* --------------- PERSONS FUNCTIONS START ------------------- */
+    
+    public void drawPerson(int x, int y, Color c) {
+        Graphics g = jLabel1.getGraphics();
+        g.setColor(c);
+        g.fillRect(x-5, y-5, 10, 10); // 10x10 box
+        g.dispose();
+    }
+    
+    public void parsePersonResultSet(ResultSet rs,Color c) {
+        try {
+            System.out.println("DRAWING!!"+rs.toString());
+            while(rs.next()) {
+                drawPerson(rs.getInt("person_position.SDO_POINT.X"), rs.getInt("person_position.SDO_POINT.Y"),c);
+            }
+            rs.close();
+        }
+        catch(Exception e) {
+            System.out.println("ERROR: in parsePerson "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
+            System.exit(Errors.RESULT_SET_ERROR);
+        }
+    }
+    
+    public void showPersons() {
+        DBUtils db = new DBUtils();
+        db.connect();
+        String query = "select p.person_position.SDO_POINT.X, p.person_position.SDO_POINT.Y from person p";
+        updateQueryBox(query);         // update UI first to appear faster
+        ResultSet rs = db.getResultSet(query);   // then actually execute query  
+        parsePersonResultSet(rs,Color.green);
+        db.close();
+    }
+    
+    /* /////////////// PERSONS FUNCTIONS END \\\\\\\\\\\\\\\\\\\\ */
+
+    /* ------------------ AP FUNCTIONS START -------------------- */
+    
+    public void drawAP(int x, int y, int r, Color c) {
+        Graphics g = jLabel1.getGraphics();
+        g.setColor(c);
+        g.fillRect(x-15/2, y-15/2, 15, 15);
+        g.drawOval(x-r, y-r, 2*r, 2*r);
+        g.dispose(); 
+    }
+    
+    public void parseAPResultSet(ResultSet rs, Color c) {
+        try {
+            while(rs.next()) {
+                drawAP(rs.getInt("ap_position.SDO_POINT.X"), rs.getInt("ap_position.SDO_POINT.Y"), rs.getInt("radius"),c);
+            }
+            rs.close();
+        }
+        catch(Exception e) {
+            System.out.println("ERROR: in parsePerson "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
+            System.exit(Errors.RESULT_SET_ERROR);
+        }
+    }
+    
+    public void showAPs() {
+        DBUtils db = new DBUtils();
+        db.connect();
+        String query = "select ap.ap_position.SDO_POINT.X, ap.ap_position.SDO_POINT.Y, ap.radius from ap ap";
+        updateQueryBox(query);         // update UI first to appear faster
+        ResultSet rs = db.getResultSet(query);   // then actually execute query  
+        parseAPResultSet(rs,Color.red);
+        db.close();
+    }
+    
+    /* /////////////////// AP FUNCTIONS END \\\\\\\\\\\\\\\\\\\\\ */
+
+    
+    /* RANGE_QUERY FUNCTIONS */
+    
+    public String RQ_constructRangeCoordinates() {
+        String range = pX.get(0).toString() + "," + pY.get(0).toString(); // init 
+        for (int i=1; i < pX.size(); i++){
+            range += "," + pX.get(i).toString() + "," + pY.get(i).toString();
+        }
+        range += "," + pX.get(0).toString() + "," + pY.get(0).toString();
+        return range;
+    }
+    
+    public void RQ_drawBuildings(String range,DBUtils db) {
+        String query = "select b.numvertices,b.shape.SDO_ORDINATES from building b where sdo_anyinteract(b.shape,sdo_geometry(2003,NULL,NULL,sdo_elem_info_array(1,1003,1),sdo_ordinate_array(" + range + ")))='TRUE'";   
+        updateQueryBox(query);
+        ResultSet rs = db.getResultSet(query);
+        parseBldgResultSet(rs,Color.yellow);
+    }
+    
+    public void RQ_drawPersons(String range,DBUtils db) {
+        String query = "select p.person_position.SDO_POINT.X ,p.person_position.SDO_POINT.Y from person p where sdo_relate(p.person_position,sdo_geometry(2003,NULL,NULL,sdo_elem_info_array(1,1003,1),sdo_ordinate_array(" + range + ")),'mask = anyinteract')='TRUE'";
+        updateQueryBox(query);
+        ResultSet rs = db.getResultSet(query);
+        parsePersonResultSet(rs,Color.green);
+    }
+    
+    public void RQ_drawAPs(String range,DBUtils db) {
+        String query = "select a.ap_position.SDO_POINT.X ,a.ap_position.SDO_POINT.Y,a.radius from ap a where sdo_relate(a.ap_position,sdo_geometry(2003,NULL,NULL,sdo_elem_info_array(1,1003,1),sdo_ordinate_array(" + range + ")),'mask = anyinteract')='TRUE'";   
+        updateQueryBox(query);
+        ResultSet rs = db.getResultSet(query);
+        parseAPResultSet(rs,Color.red);
+    }
+    
+    /* END RANGE QUERY FUNCTIONS */
+    
+    /* POINT QUERY FUNCTIONS */
+    
+    public String PQ_constructPointCoordinates() {
+        String points= (mouseX+70) + "," + mouseY + "," + mouseX+"," + (mouseY+70) + "," + (mouseX-70) + "," + mouseY;
+        return points;
+    }
+    
+    public void PQ_drawBuildings(String points, DBUtils db) {
+        String query = "select b.numvertices,b.shape.SDO_ORDINATES from building b where sdo_anyinteract(b.shape,sdo_geometry(2003,NULL,NULL,sdo_elem_info_array(1,1003,4),sdo_ordinate_array(" + points + ")))='TRUE'"; 
+        updateQueryBox(query);
+        ResultSet rs = db.getResultSet(query);
+        parseBldgResultSet(rs,Color.green);
+    }
+    
+    public void PQ_drawPersons(String points, DBUtils db) {
+        String query = "select p.person_position.SDO_POINT.X ,p.person_position.SDO_POINT.Y from person p where sdo_relate(p.person_position,sdo_geometry(2003,NULL,NULL,sdo_elem_info_array(1,1003,4),sdo_ordinate_array(" + points + ")),'mask = anyinteract')='TRUE'";
+        updateQueryBox(query);
+        ResultSet rs = db.getResultSet(query);
+        parsePersonResultSet(rs,Color.green);
+    }
+    
+    public void PQ_drawAPs(String points, DBUtils db) {
+        String query = "select a.ap_position.SDO_POINT.X ,a.ap_position.SDO_POINT.Y,a.radius from ap a where sdo_relate(a.ap_position,sdo_geometry(2003,NULL,NULL,sdo_elem_info_array(1,1003,4),sdo_ordinate_array(" + points + ")),'mask = anyinteract')='TRUE'";   
+        updateQueryBox(query);
+        ResultSet rs = db.getResultSet(query);
+        parseAPResultSet(rs,Color.green);
+    }
+    
+    /* END POINT QUERY FUNCTIONS */
+    
+    /* START AP FUNCTIONS */
+    
+    public String AP_constructPointCoordinates(int offset) {
+        String points  = (xc + (radius + offset)) + "," + yc + "," +  xc + "," + (yc + (radius+offset)) + "," + (xc - (radius+offset)) + "," + yc;
+        return points;
+    }
+    
+    public void AP_drawLineToPerson(int x, int y, Color c) {
+        Graphics g = jLabel1.getGraphics();
+        g.setColor(c);
+        g.fillRect(x-5, y-5, 10, 10);
+        g.drawLine(xc, yc, x, y);
+        g.dispose();          
+    }
+    
+    public void AP_parsePersons(ResultSet rs,Color c) {
+        try {
+            System.out.println("DRAWING!!"+rs.toString());
+            while(rs.next()) {
+                AP_drawLineToPerson(rs.getInt("person_position.SDO_POINT.X"), rs.getInt("person_position.SDO_POINT.Y"),c);
+            }
+            rs.close();
+        }
+        catch(Exception e) {
+            System.out.println("ERROR: in AP_parsePerson "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
+            System.exit(Errors.RESULT_SET_ERROR);
+        }
+    }
+    
+    public void AP_queryPersons(String points, DBUtils db, Color c) {
+        String query = "select p.person_position.SDO_POINT.X ,p.person_position.SDO_POINT.Y from person p where sdo_relate(p.person_position,sdo_geometry(2003,NULL,NULL,sdo_elem_info_array(1,1003,4),sdo_ordinate_array(" + points + ")),'mask = anyinteract')='TRUE'";
+        updateQueryBox(query);
+        ResultSet rs = db.getResultSet(query);
+        AP_parsePersons(rs,c);
+    }
+    
+    /* END AP FUNCTIONS  */
+    
+    /******************** SUBMIT QUERY HANDLER  *****************/
+    
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        int queryType = getQueryType();
+        ArrayList<String> checked = getChecked();
+        DBUtils db = new DBUtils();
+        String points; // used by PQ and AP
+        switch(queryType) {
+            case WHOLE_REGION:  
+                // iterate checked array
+                for(String feature : checked) {
+                    if(feature.equalsIgnoreCase("buildings")) {
+                        showBuildings();
+                    }
+                    if(feature.equalsIgnoreCase("people")) {
+                        showPersons();
+                    }
+                    if(feature.equalsIgnoreCase("access points")) {
+                        showAPs();
+                    }
+                }
+                break;
+            
+            case RANGE_QUERY:   
+                String range = RQ_constructRangeCoordinates();
+                db.connect();
+                for(String feature : checked) {
+                    if(feature.equalsIgnoreCase("buildings")) {
+                        RQ_drawBuildings(range,db);
+                    }
+                    if(feature.equalsIgnoreCase("people")) {
+                        RQ_drawPersons(range,db);
+                    }
+                    if(feature.equalsIgnoreCase("access points")) {
+                        RQ_drawAPs(range,db);
+                    }
+                }
+                db.close();
+                break;
+            
+            case POINT_QUERY:   
+                points = PQ_constructPointCoordinates();
+                db.connect();
+                for(String feature : checked) {
+                    if(feature.equalsIgnoreCase("buildings")) {
+                        PQ_drawBuildings(points,db);
+                    }
+                    if(feature.equalsIgnoreCase("people")) {
+                        PQ_drawPersons(points,db);
+                    }
+                    if(feature.equalsIgnoreCase("access points")) {
+                        PQ_drawAPs(points,db);
+                    }
+                }
+                db.close();
+                break;
+            
+            case AP_COVERED:
+                db.connect();
+                points = AP_constructPointCoordinates(10);
+                AP_queryPersons(points, db, Color.blue);
+                points = AP_constructPointCoordinates(0);
+                AP_queryPersons(points, db, Color.yellow);
+                db.close();
+                break;
+            
+            default:            
+                break;
+        }
+        
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    
     public void getNearestAP(int x, int y, Graphics g) {
         DBUtils db = new DBUtils();
         db.connect();
@@ -254,106 +580,7 @@ public class Hw2 extends javax.swing.JFrame {
         }
     }
     
-    /* ------------ BUILDING FUNCTIONS START --------------- */
     
-    public void drawBuildings(int[] x,int[] y, int numVertices) {
-        Graphics g = jLabel1.getGraphics();
-        g.setColor(Color.yellow);
-        g.drawPolygon(x,y,numVertices);
-        g.dispose();  
-    }
-    public void parseBldgResultSet(ResultSet rs) {
-        try{
-            while (rs.next()){
-                int i = 0;
-                boolean isX = true;
-                Array rsArr = ((OracleResultSet)rs).getArray("shape.SDO_ORDINATES");
-                int numVertices = rs.getInt("numvertices");
-                Number[] pos = (Number[])rsArr.getArray();
-                int[] x = new int[pos.length];
-                int[] y = new int[pos.length];
-                for(Number p : pos){
-                    if (isX){
-                        x[i] = p.intValue();
-                        isX = false;
-                    }
-                    else {
-                        y[i] = p.intValue();
-                        isX = true;
-                        i++; // next point
-                    }
-                }
-                drawBuildings(x,y,numVertices);             
-            }
-            rs.close();
-        }
-        catch(Exception e){
-            System.out.println("ERROR: in parseBldg "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
-            System.exit(Errors.RESULT_SET_ERROR);
-        }
-
-    }
-    public void showBuildings() {
-        DBUtils db = new DBUtils();
-        db.connect();
-        String query = "select b.numvertices,b.shape.SDO_ORDINATES from building b";
-        updateQueryBox(query);         // update UI first to appear faster
-        ResultSet rs = db.getResultSet(query);   // then actually execute query
-        parseBldgResultSet(rs);
-        db.close();
-    }
-    
-    /* //////////////  BUILDING FUNCTIONS END \\\\\\\\\\\\\\\\\\\\ */
-    
-    /* --------------- PERSONS FUNCTIONS START ------------------- */
-    
-    public void drawPerson(int x, int y) {
-        Graphics g = jLabel1.getGraphics();
-        g.setColor(Color.green);
-        g.fillRect(x-5, y-5, 10, 10); // 10x10 box
-        g.dispose();
-    }
-    
-    public void parsePersonResultSet(ResultSet rs) {
-        try {
-            while(rs.next()) {
-                drawPerson(rs.getInt("person_position.SDO_POINT.X"), rs.getInt("person_position.SDO_POINT.Y"));
-            }
-            rs.close();
-        }
-        catch(Exception e) {
-            System.out.println("ERROR: in parsePerson "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
-            System.exit(Errors.RESULT_SET_ERROR);
-        }
-    }
-    
-    public void showPersons() {
-        DBUtils db = new DBUtils();
-        db.connect();
-        String query = "select p.person_position.SDO_POINT.X, p.person_position.SDO_POINT.Y from person p";
-        updateQueryBox(query);         // update UI first to appear faster
-        ResultSet rs = db.getResultSet(query);   // then actually execute query  
-        parsePersonResultSet(rs);
-        db.close();
-    }
-    
-    /* /////////////// PERSONS FUNCTIONS END \\\\\\\\\\\\\\\\\\\\ */
-
-    /* ------------------ AP FUNCTIONS START -------------------- */
-
-    public void showAPs() {
-        
-    }
-    
-    /* /////////////////// AP FUNCTIONS END \\\\\\\\\\\\\\\\\\\\\ */
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        int queryType = getQueryType();
-        ArrayList<String> checked = getChecked();
-        
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
         // TODO add your handling code here:
         // Does different things depending on which radio button is checked.
@@ -394,9 +621,11 @@ public class Hw2 extends javax.swing.JFrame {
                                 break;
             case POINT_QUERY:   // respond only on left click
                                 if(evt.getButton() == MouseEvent.BUTTON1) {
+                                    mouseX = evt.getX();
+                                    mouseY = evt.getY();
                                     g.setColor(Color.red);
-                                    g.fillRect(evt.getX()-(5/2),evt.getY()-(5/2),5,5);
-                                    g.drawOval(evt.getX()-70,evt.getY()-70,140,140);
+                                    g.fillRect(mouseX-(5/2),mouseY-(5/2),5,5);
+                                    g.drawOval(mouseX-70,mouseY-70,140,140);
                                 }
                                 break;
             case AP_COVERED:    // respond only on left click
@@ -426,6 +655,15 @@ public class Hw2 extends javax.swing.JFrame {
         showPersons();
         showAPs();
     }//GEN-LAST:event_jRadioButton4ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        jLabel1.repaint();
+        jRadioButton1.setSelected(false);
+        jRadioButton2.setSelected(false);
+        jRadioButton3.setSelected(false);
+        jRadioButton4.setSelected(false);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -462,7 +700,9 @@ public class Hw2 extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JCheckBox jCheckBox3;
