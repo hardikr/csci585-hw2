@@ -8,6 +8,8 @@ import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import oracle.jdbc.OracleResultSet;
+import oracle.jdbc2.Array;
 
 /**
  *
@@ -220,13 +222,17 @@ public class Hw2 extends javax.swing.JFrame {
         return checked;
     }
     
+    public void updateQueryBox(String query) {
+        numQueries++;
+        jTextArea1.append("\nQuery "+numQueries+": "+query);
+    }
+    
     public void getNearestAP(int x, int y, Graphics g) {
         DBUtils db = new DBUtils();
         db.connect();
         String query = "select a.ap_position.SDO_POINT.X ,a.ap_position.SDO_POINT.Y,a.radius from ap a where SDO_NN(a.ap_position,SDO_GEOMETRY(2001,NULL,SDO_POINT_TYPE("+ x + "," + y + ",NULL),NULL,NULL),'SDO_NUM_RES = 1') = 'TRUE'"; 
         // update query text box
-        numQueries++;
-        jTextArea1.append("\nQuery "+numQueries+": "+query);
+        updateQueryBox(query);
         // make actual query
         ResultSet rs = db.getResultSet(query);
         try {
@@ -243,23 +249,104 @@ public class Hw2 extends javax.swing.JFrame {
             rs.close();
         }
         catch(Exception e) {
-            System.out.println("ERROR: "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
+            System.out.println("ERROR: in getNearestAP "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
             System.exit(Errors.RESULT_SET_ERROR);
         }
     }
     
-    public void showAllBuildings() {
+    /* ------------ BUILDING FUNCTIONS START --------------- */
+    
+    public void drawBuildings(int[] x,int[] y, int numVertices) {
+        Graphics g = jLabel1.getGraphics();
+        g.setColor(Color.yellow);
+        g.drawPolygon(x,y,numVertices);
+        g.dispose();  
+    }
+    public void parseBldgResultSet(ResultSet rs) {
+        try{
+            while (rs.next()){
+                int i = 0;
+                boolean isX = true;
+                Array rsArr = ((OracleResultSet)rs).getArray("shape.SDO_ORDINATES");
+                int numVertices = rs.getInt("numvertices");
+                Number[] pos = (Number[])rsArr.getArray();
+                int[] x = new int[pos.length];
+                int[] y = new int[pos.length];
+                for(Number p : pos){
+                    if (isX){
+                        x[i] = p.intValue();
+                        isX = false;
+                    }
+                    else {
+                        y[i] = p.intValue();
+                        isX = true;
+                        i++; // next point
+                    }
+                }
+                drawBuildings(x,y,numVertices);             
+            }
+            rs.close();
+        }
+        catch(Exception e){
+            System.out.println("ERROR: in parseBldg "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
+            System.exit(Errors.RESULT_SET_ERROR);
+        }
+
+    }
+    public void showBuildings() {
+        DBUtils db = new DBUtils();
+        db.connect();
+        String query = "select b.numvertices,b.shape.SDO_ORDINATES from building b";
+        updateQueryBox(query);         // update UI first to appear faster
+        ResultSet rs = db.getResultSet(query);   // then actually execute query
+        parseBldgResultSet(rs);
+        db.close();
+    }
+    
+    /* //////////////  BUILDING FUNCTIONS END \\\\\\\\\\\\\\\\\\\\ */
+    
+    /* --------------- PERSONS FUNCTIONS START ------------------- */
+    
+    public void drawPerson(int x, int y) {
+        Graphics g = jLabel1.getGraphics();
+        g.setColor(Color.green);
+        g.fillRect(x-5, y-5, 10, 10); // 10x10 box
+        g.dispose();
+    }
+    
+    public void parsePersonResultSet(ResultSet rs) {
+        try {
+            while(rs.next()) {
+                drawPerson(rs.getInt("person_position.SDO_POINT.X"), rs.getInt("person_position.SDO_POINT.Y"));
+            }
+            rs.close();
+        }
+        catch(Exception e) {
+            System.out.println("ERROR: in parsePerson "+Errors.RESULT_SET_ERROR+" Exception: "+e.toString());
+            System.exit(Errors.RESULT_SET_ERROR);
+        }
+    }
+    
+    public void showPersons() {
+        DBUtils db = new DBUtils();
+        db.connect();
+        String query = "select p.person_position.SDO_POINT.X, p.person_position.SDO_POINT.Y from person p";
+        updateQueryBox(query);         // update UI first to appear faster
+        ResultSet rs = db.getResultSet(query);   // then actually execute query  
+        parsePersonResultSet(rs);
+        db.close();
+    }
+    
+    /* /////////////// PERSONS FUNCTIONS END \\\\\\\\\\\\\\\\\\\\ */
+
+    /* ------------------ AP FUNCTIONS START -------------------- */
+
+    public void showAPs() {
         
     }
     
-    public void showAllPersons() {
-        
-    }
-    
-    public void showAllAPs() {
-        
-    }
-    
+    /* /////////////////// AP FUNCTIONS END \\\\\\\\\\\\\\\\\\\\\ */
+
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         int queryType = getQueryType();
@@ -297,7 +384,7 @@ public class Hw2 extends javax.swing.JFrame {
                                 }
                                 // right click to end the polygon
                                 else if(evt.getButton() == MouseEvent.BUTTON3) {
-                                    // we need at least 3 points
+                                    // we need at least 3 points - 2 sides
                                     if(pX.size() >= 3) {
                                         g.setColor(Color.red);
                                         // line from last to first point
@@ -335,9 +422,9 @@ public class Hw2 extends javax.swing.JFrame {
 
     private void jRadioButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton4ActionPerformed
         // TODO add your handling code here:
-        showAllBuildings();
-        showAllPersons();
-        showAllAPs();
+        showBuildings();
+        showPersons();
+        showAPs();
     }//GEN-LAST:event_jRadioButton4ActionPerformed
 
     /**
